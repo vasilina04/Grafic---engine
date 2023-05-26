@@ -1,7 +1,6 @@
 from lib.math.main import *
 from lib.Exception.EngineException import *
 import uuid
-from typing import Callable
 from math import *
 
 PRECISION = 5
@@ -31,19 +30,14 @@ class Identifier:
     def get_value(self):
         return self.value
 
-    @classmethod
-    def get_last_value(cls):
-        return cls.ids[-1]
-
-    def set_value(self, value):
-        self.value = value
-
 
 class Entity:
-    def __init__(self):
+    def __init__(self, cs: CoordinateSystem):
         self.__dict__["properties"] = set()
+        self.set_property("cs", cs)
+        self.set_property("identifier", Identifier())
 
-    def get_property(self, prop: str, default=None):
+    def get_property(self, prop: str, default):
         if prop not in self.__dict__["properties"]:
             return default
 
@@ -95,9 +89,8 @@ class EntitiesList:
                 return entity
         raise EngineExceptionEntity(EngineExceptionEntity.NOT_ENTITY_LIST)
 
-    def exec(self, function: Callable[id: Identifier]):
-        for e in self.entities:
-            function(e)
+    def exec(self, function):
+        pass
 
     def __getitem__(self, id):
         return self.get(id)
@@ -127,52 +120,45 @@ class Game:
 
     def get_ray_class(self):
         class GameRay(Ray):
-            def __init__(self):
-                super().__init__(self.cs)
+            def __init__(entityself, pt, direction):
+                super().__init__(self.cs, pt, direction)
 
         return GameRay
 
-    class GameObject(Entity):
-        def __int__(entityself, position: Point, direction: Vector):
-            super().__init__()
-            if position.dim() != direction.dim():
-                raise EngineException(VectorException.VECTOR_SIZE)
+    def get_object_class(self):
+        class GameObject(self.get_entity_class()):
+            def __int__(entityself, position: Point, direction: Vector):
+                super().__init__(entityself.cs)
+                if position.dim() != direction.dim():
+                    raise EngineException(VectorException.VECTOR_SIZE)
 
-            entityself.position = position
-            entityself.direction = direction.normalize()
+                entityself.position = position
+                entityself.direction = direction.normalize()
 
-        def move(entityself, direction: Vector):
-            entityself.position += direction
+            def move(entityself, direction: Vector):
+                entityself.position += direction
 
-        def planar_rotate(entityself, inds: (int, int), angle: float):
-            res = entityself.direction * Matrix.rotate_matrix(entityself.dim, inds[0], inds[1], angle)
-            entityself.set_property(res)
+            def planar_rotate(entityself, inds: (int, int), angle: float):
+                result = entityself.direction * Matrix.rotate_matrix(entityself.dim, inds[0], inds[1], angle)
+                entityself.set_property(result)
 
-        def rotate_3d(entityself, angles: (float, float, float)):
-            rotation = Matrix.rotate_matrix(3, 1, 2, angles[1]) * Matrix.rotate_matrix(3, 0, 2, angles[1]) * \
-                  Matrix.rotate_matrix(3, 0, 1, angles[1])
-            result = entityself.direction * rotation
-            entityself.set_direction(result)
+            def rotate_3d(entityself, angles: (float, float, float)):
+                rotation = Matrix.rotate_matrix(3, 1, 2, angles[1]) * Matrix.rotate_matrix(3, 0, 2, angles[1]) * \
+                      Matrix.rotate_matrix(3, 0, 1, angles[1])
+                result = entityself.direction * rotation
+                entityself.set_direction(result)
 
-        def set_position(entityself, position: Point):
-            entityself.set_property('Position', position)
+            def set_position(entityself, position: Point):
+                entityself.set_property('Position', position)
 
-        def set_direction(entityself, direction: Vector):
-            entityself.set_property('Direction', direction.normalize())
+            def set_direction(entityself, direction: Vector):
+                entityself.set_property('Direction', direction.normalize())
 
-    class GameCamera(GameObject):
-        def __init__(self, draw_distance: (float, int), fov: (float, int), vfov: (float, int) = None,
-                     look_at: Point = None):
-            if vfov is None:
-                self.vfov = fov
-            self.fov = fov
-            self.vfov = vfov
-            self.look_at = look_at
-            self.draw_distance = draw_distance
-
-
-
-
-
-
-
+    def get_camera_class(self):
+        class GameCamera(self.get_entity_class()):
+            def __init__(self, draw_distance: (float, int), fov: (float, int), vfov: (float, int) = None,
+                         look_at: Point = None):
+                self.fov = fov
+                self.vfov = vfov
+                self.look_at = look_at
+                self.draw_distance = draw_distance

@@ -3,11 +3,49 @@ from lib.Exception.EngineException import *
 import pytest
 
 
-class TestsEntity:
-    def test_get_property_error(self=None):
+class TestRay:
+    def testInitial(self):
         basis = VectorSpace([Vector([1, 0, 0]), Vector([0, 1, 0]), Vector([0, 0, 1])])
-        entity = Entity(CoordinateSystem(basis, Point([1, 0, 0])))
-        prop = "Power Up"
+        point = Point([0, 0, 0])
+        coordinate = CoordinateSystem(point, basis)
+        vector = Vector([1, 1, 1])
+        ray = Ray(coordinate, point, vector)
+
+        act = isinstance(ray, Ray)
+
+        assert act
+
+
+class TestEntity:
+    def testInitial(self):
+        point = Point([[0], [1], [0]])
+        vecspace = VectorSpace([Vector([1, 0, 0]), Vector([0, 1, 0]), Vector([0, 0, 1])])
+        cs = CoordinateSystem(point, vecspace)
+        a = Entity(cs)
+
+        act = isinstance(a, Entity)
+
+        assert act
+
+    def testpropExeption(self):
+        point = Point([[0], [1], [0]])
+        vecspace = VectorSpace([Vector([1, 0, 0]), Vector([0, 1, 0]), Vector([0, 0, 1])])
+        cs = CoordinateSystem(point, vecspace)
+        entity = Entity(cs)
+        prop = "Coordinate"
 
         with pytest.raises(EngineExceptionEntity):
-            res = entity.prop
+            act = entity.prop
+
+    def testpropety(self):
+        point = Point([[0], [1], [0]])
+        vecspace = VectorSpace([Vector([1, 0, 0]), Vector([0, 1, 0]), Vector([0, 0, 1])])
+        cs = CoordinateSystem(point, vecspace)
+        a = Entity(cs)
+        prop = "PowerUp"
+        val = "QuadShot"
+        a.set_property(prop, val)
+
+        act = ((a.get_property("PowerUp")) == "QuadShot")
+
+        assert act

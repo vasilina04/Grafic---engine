@@ -24,6 +24,7 @@ if __name__ == "__main__":
     # print("\nGram \n\n", m.gram())
     # v = Vector([1, 4, 6])
     # v2 = Vector([1, 5, 4])
+    
     # print("\nVector scalar \n", Vector.scalar(v, v2))
     # print(v % v2)
     # vector = Vector([1, 2, 3])
